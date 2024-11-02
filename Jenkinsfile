@@ -5,25 +5,25 @@ pipeline {
     environment {
         MAJOR = '1'
         MINOR = '0'
-        // Local Deployment Path
-        LOCAL_DEPLOY_PATH = 'C:\\Jen\\'
+        // Local Deployment Path (Ensure this path is correct for your environment)
+        LOCAL_DEPLOY_PATH = 'C:\\Jen'
     }
 
     stages {
         stage('Preparing') {
             steps {
-                echo "Jenkins Home ${env.JENKINS_HOME}"
-                echo "Jenkins URL ${env.JENKINS_URL}"
-                echo "Jenkins JOB Number ${env.BUILD_NUMBER}"
-                echo "Jenkins JOB Name ${env.JOB_NAME}"
-                echo "GitHub BranchName ${env.BRANCH_NAME}"
+                echo "Jenkins Home: ${env.JENKINS_HOME}"
+                echo "Jenkins URL: ${env.JENKINS_URL}"
+                echo "Jenkins JOB Number: ${env.BUILD_NUMBER}"
+                echo "Jenkins JOB Name: ${env.JOB_NAME}"
+                echo "GitHub BranchName: ${env.BRANCH_NAME}"
                 checkout scm
             }
         }
 
         stage('Build') {
             steps {
-                echo "Building... with ${env.WORKSPACE}"
+                echo "Building with workspace: ${WORKSPACE}"
                 UiPathPack (
                     outputPath: "Output\\${env.BUILD_NUMBER}",
                     projectJsonPath: "project.json",
@@ -36,27 +36,38 @@ pipeline {
 
         stage('Test') {
             steps {
-                echo 'Testing... the workflow...'
+                echo 'Testing the workflow...'
+                // Add your testing commands here
             }
         }
 
         stage('Deploy to Local UAT') {
             steps {
-                echo "Deploying ${env.BRANCH_NAME} to Local UAT at ${env.LOCAL_DEPLOY_PATH}/UAT"
-                sh """
-                    mkdir -p ${env.LOCAL_DEPLOY_PATH}/UAT
-                    cp -r Output/${env.BUILD_NUMBER}/* ${env.LOCAL_DEPLOY_PATH}/UAT/
+                echo "Deploying ${env.BRANCH_NAME} to Local UAT at ${env.LOCAL_DEPLOY_PATH}\\UAT"
+                bat """
+                    mkdir "${env.LOCAL_DEPLOY_PATH}\\UAT"
+                    xcopy /E /I /Y "Output\\${env.BUILD_NUMBER}\\*" "${env.LOCAL_DEPLOY_PATH}\\UAT\\"
                 """
+                // If using a Unix/Linux agent, replace the above `bat` block with:
+                // sh """
+                //     mkdir -p "${env.LOCAL_DEPLOY_PATH}/UAT"
+                //     cp -r "Output/${env.BUILD_NUMBER}/." "${env.LOCAL_DEPLOY_PATH}/UAT/"
+                // """
             }
         }
 
         stage('Deploy to Local Production') {
             steps {
-                echo "Deploying ${env.BRANCH_NAME} to Local Production at ${env.LOCAL_DEPLOY_PATH}/Production"
-                sh """
-                    mkdir -p ${env.LOCAL_DEPLOY_PATH}/Production
-                    cp -r Output/${env.BUILD_NUMBER}/* ${env.LOCAL_DEPLOY_PATH}/Production/
+                echo "Deploying ${env.BRANCH_NAME} to Local Production at ${env.LOCAL_DEPLOY_PATH}\\Production"
+                bat """
+                    mkdir "${env.LOCAL_DEPLOY_PATH}\\Production"
+                    xcopy /E /I /Y "Output\\${env.BUILD_NUMBER}\\*" "${env.LOCAL_DEPLOY_PATH}\\Production\\"
                 """
+                // If using a Unix/Linux agent, replace the above `bat` block with:
+                // sh """
+                //     mkdir -p "${env.LOCAL_DEPLOY_PATH}/Production"
+                //     cp -r "Output/${env.BUILD_NUMBER}/." "${env.LOCAL_DEPLOY_PATH}/Production/"
+                // """
             }
         }
     }
@@ -68,7 +79,7 @@ pipeline {
 
     post {
         success {
-            echo 'Deployment has been completed!'
+            echo 'Deployment has been completed successfully!'
         }
         failure {
             echo "FAILED: Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]' (${env.JOB_DISPLAY_URL})"
@@ -76,6 +87,7 @@ pipeline {
         always {
             // Uncomment the next line if you want to clean the workspace after every run
             // cleanWs()
+            echo 'This will always run regardless of the pipeline result.'
         }
     }
 }
