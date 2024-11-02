@@ -10,8 +10,6 @@ pipeline {
     }
 
     stages {
-
-        // Printing Basic Information
         stage('Preparing') {
             steps {
                 echo "Jenkins Home ${env.JENKINS_HOME}"
@@ -23,7 +21,6 @@ pipeline {
             }
         }
 
-        // Build Stages
         stage('Build') {
             steps {
                 echo "Building..with ${WORKSPACE}"
@@ -37,14 +34,12 @@ pipeline {
             }
         }
 
-        // Test Stages
         stage('Test') {
             steps {
                 echo 'Testing..the workflow...'
             }
         }
 
-        // Deploy to Local UAT
         stage('Deploy to Local UAT') {
             steps {
                 echo "Deploying ${BRANCH_NAME} to Local UAT at ${LOCAL_DEPLOY_PATH}/UAT"
@@ -55,7 +50,6 @@ pipeline {
             }
         }
 
-        // Deploy to Local Production
         stage('Deploy to Local Production') {
             steps {
                 echo "Deploying ${BRANCH_NAME} to Local Production at ${LOCAL_DEPLOY_PATH}/Production"
@@ -67,24 +61,27 @@ pipeline {
         }
     }
 
-    // Options
     options {
-        // Timeout for pipeline
         timeout(time: 80, unit: 'MINUTES')
         skipDefaultCheckout()
     }
 
-    // Post Actions
     post {
         success {
-            echo 'Deployment has been completed!'
+            steps {
+                echo 'Deployment has been completed!'
+            }
         }
         failure {
-            echo "FAILED: Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]' (${env.JOB_DISPLAY_URL})"
+            steps {
+                echo "FAILED: Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]' (${env.JOB_DISPLAY_URL})"
+            }
         }
         always {
-            /* Clean workspace if success */
-            // cleanWs()
+            steps {
+                // Uncomment the next line if you want to clean the workspace after every run
+                // cleanWs()
+            }
         }
     }
 }
