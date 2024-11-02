@@ -6,7 +6,7 @@ pipeline {
         MAJOR = '1'
         MINOR = '0'
         // Local Deployment Path
-        LOCAL_DEPLOY_PATH = 'C:\Jen'
+        LOCAL_DEPLOY_PATH = 'C:\\Jen\\'
     }
 
     stages {
