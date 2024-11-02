@@ -23,7 +23,7 @@ pipeline {
 
         stage('Build') {
             steps {
-                echo "Building..with ${WORKSPACE}"
+                echo "Building... with ${env.WORKSPACE}"
                 UiPathPack (
                     outputPath: "Output\\${env.BUILD_NUMBER}",
                     projectJsonPath: "project.json",
@@ -36,26 +36,26 @@ pipeline {
 
         stage('Test') {
             steps {
-                echo 'Testing..the workflow...'
+                echo 'Testing... the workflow...'
             }
         }
 
         stage('Deploy to Local UAT') {
             steps {
-                echo "Deploying ${BRANCH_NAME} to Local UAT at ${LOCAL_DEPLOY_PATH}/UAT"
+                echo "Deploying ${env.BRANCH_NAME} to Local UAT at ${env.LOCAL_DEPLOY_PATH}/UAT"
                 sh """
-                    mkdir -p ${LOCAL_DEPLOY_PATH}/UAT
-                    cp -r Output/${env.BUILD_NUMBER}/* ${LOCAL_DEPLOY_PATH}/UAT/
+                    mkdir -p ${env.LOCAL_DEPLOY_PATH}/UAT
+                    cp -r Output/${env.BUILD_NUMBER}/* ${env.LOCAL_DEPLOY_PATH}/UAT/
                 """
             }
         }
 
         stage('Deploy to Local Production') {
             steps {
-                echo "Deploying ${BRANCH_NAME} to Local Production at ${LOCAL_DEPLOY_PATH}/Production"
+                echo "Deploying ${env.BRANCH_NAME} to Local Production at ${env.LOCAL_DEPLOY_PATH}/Production"
                 sh """
-                    mkdir -p ${LOCAL_DEPLOY_PATH}/Production
-                    cp -r Output/${env.BUILD_NUMBER}/* ${LOCAL_DEPLOY_PATH}/Production/
+                    mkdir -p ${env.LOCAL_DEPLOY_PATH}/Production
+                    cp -r Output/${env.BUILD_NUMBER}/* ${env.LOCAL_DEPLOY_PATH}/Production/
                 """
             }
         }
@@ -68,20 +68,14 @@ pipeline {
 
     post {
         success {
-            steps {
-                echo 'Deployment has been completed!'
-            }
+            echo 'Deployment has been completed!'
         }
         failure {
-            steps {
-                echo "FAILED: Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]' (${env.JOB_DISPLAY_URL})"
-            }
+            echo "FAILED: Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]' (${env.JOB_DISPLAY_URL})"
         }
         always {
-            steps {
-                // Uncomment the next line if you want to clean the workspace after every run
-                // cleanWs()
-            }
+            // Uncomment the next line if you want to clean the workspace after every run
+            // cleanWs()
         }
     }
 }
